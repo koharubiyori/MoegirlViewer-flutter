@@ -45,6 +45,7 @@ class CommentTree {
   static List<Map> flattenItem(List<Map> children) {
     return children.fold<List<Map>>(<Map>[], (result, item) {
       final children = item['children'] ?? [];
+      item.remove('children');
       return [...result, item, ...flattenItem(children)];
     });
   }

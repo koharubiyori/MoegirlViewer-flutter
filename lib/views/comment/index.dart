@@ -1,25 +1,22 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:moegirl_plus/components/indexed_view.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:moegirl_plus/components/infinity_list_footer.dart';
 import 'package:moegirl_plus/components/provider_selectors/night_selector.dart';
 import 'package:moegirl_plus/components/structured_list_view.dart';
 import 'package:moegirl_plus/components/styled_widgets/app_bar_back_button.dart';
 import 'package:moegirl_plus/components/styled_widgets/app_bar_icon.dart';
 import 'package:moegirl_plus/components/styled_widgets/app_bar_title.dart';
-import 'package:moegirl_plus/components/styled_widgets/circular_progress_indicator.dart';
 import 'package:moegirl_plus/components/styled_widgets/refresh_indicator.dart';
+import 'package:moegirl_plus/mobx/index.dart';
 import 'package:moegirl_plus/providers/account.dart';
-import 'package:moegirl_plus/providers/comment.dart';
 import 'package:moegirl_plus/utils/add_infinity_list_loading_listener.dart';
 import 'package:moegirl_plus/utils/check_is_login.dart';
-import 'package:moegirl_plus/utils/keyboard_visible_aware.dart';
 import 'package:moegirl_plus/utils/ui/dialog/loading.dart';
 import 'package:moegirl_plus/utils/ui/toast/index.dart';
 import 'package:moegirl_plus/views/comment/components/item.dart';
 import 'package:one_context/one_context.dart';
-import 'package:provider/provider.dart';
 
 import 'utils/show_comment_editor/index.dart';
 
@@ -47,7 +44,7 @@ class _CommentPageState extends State<CommentPage> {
   @override
   void initState() {
     super.initState();
-    addInfinityListLoadingListener(scrollController, () => commentProvider.loadNext(widget.routeArgs.pageId));
+    addInfinityListLoadingListener(scrollController, () => commentStore.loadNext(widget.routeArgs.pageId));
   }
 
   @override
@@ -63,7 +60,7 @@ class _CommentPageState extends State<CommentPage> {
     if (commentContent == null) return;
     showLoading(text: '提交中...');
     try {
-      await commentProvider.addComment(widget.routeArgs.pageId, commentContent);
+      await commentStore.addComment(widget.routeArgs.pageId, commentContent);
       toast('发布成功', position: ToastPosition.center);
     } catch(e) {
       if (!(e is DioError)) rethrow;
@@ -91,11 +88,11 @@ class _CommentPageState extends State<CommentPage> {
         builder: (isNight) => (
           Container(
             color: isNight ? theme.backgroundColor : Color(0xffeeeeee),
-            child: Selector<CommentProviderModel, ProviderCommentData>(
-              selector: (_, provider) => provider.data[widget.routeArgs.pageId],
-              builder: (_, commentData, __) => (
-                StyledRefreshIndicator(
-                  onRefresh: () => commentProvider.refresh(widget.routeArgs.pageId),
+            child: Observer(
+              builder: (context) {
+                final commentData = commentStore.data[widget.routeArgs.pageId];
+                return StyledRefreshIndicator(
+                  onRefresh: () => commentStore.refresh(widget.routeArgs.pageId),
                   child: StructuredListView(
                     controller: scrollController,
                     itemDataList: commentData.commentTree,
@@ -120,7 +117,7 @@ class _CommentPageState extends State<CommentPage> {
                               isPopular: true,
                               commentData: itemData,
                               pageId: widget.routeArgs.pageId,
-                              visibleDelButton: accountProvider.userName == itemData['username'],
+                              visibleDelButton: accountProvider.userName == itemData.userName,
                               visibleRpleyButton: false,
                             )
                           ).toList(),
@@ -142,7 +139,7 @@ class _CommentPageState extends State<CommentPage> {
                       CommentPageItem(
                         commentData: itemData,
                         pageId: widget.routeArgs.pageId,
-                        visibleDelButton: accountProvider.userName == itemData['username'],
+                        visibleDelButton: accountStore.userName == itemData['username'],
                         visibleReply: true,
                         visibleRpleyButton: true,
                       )
@@ -151,11 +148,11 @@ class _CommentPageState extends State<CommentPage> {
                     footerBuilder: () => InfinityListFooter(
                       status: commentData.status, 
                       emptyText: '暂无评论',
-                      onReloadingButtonPrssed: () => commentProvider.loadNext(widget.routeArgs.pageId)
+                      onReloadingButtonPrssed: () => commentStore.loadNext(widget.routeArgs.pageId)
                     )
                   ),
-                )
-              ),
+                );
+              },
             ),
           )
         ),

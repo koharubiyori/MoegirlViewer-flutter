@@ -5,20 +5,19 @@ import 'dart:ui';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mobx/mobx.dart';
 import 'package:moegirl_plus/api/article.dart';
 import 'package:moegirl_plus/components/article_view/utils/create_moegirl_renderer_config.dart';
 import 'package:moegirl_plus/components/html_web_view/index.dart';
 import 'package:moegirl_plus/components/indexed_view.dart';
-import 'package:moegirl_plus/providers/account.dart';
-import 'package:moegirl_plus/providers/settings.dart';
+import 'package:moegirl_plus/mobx/index.dart';
 import 'package:moegirl_plus/request/moe_request.dart';
 import 'package:moegirl_plus/request/plain_request.dart';
 import 'package:moegirl_plus/themes.dart';
 import 'package:moegirl_plus/utils/article_cache_manager.dart';
+import 'package:moegirl_plus/utils/check_if_nonauto_confirmed_to_show_edit_alert.dart';
 import 'package:moegirl_plus/utils/color2rgb_css.dart';
 import 'package:moegirl_plus/utils/media_wiki_namespace.dart';
-import 'package:moegirl_plus/utils/provider_change_checker.dart';
-import 'package:moegirl_plus/utils/check_if_nonauto_confirmed_to_show_edit_alert.dart';
 import 'package:moegirl_plus/utils/ui/dialog/alert.dart';
 import 'package:moegirl_plus/utils/ui/dialog/loading.dart';
 import 'package:moegirl_plus/utils/ui/toast/index.dart';
@@ -28,7 +27,6 @@ import 'package:moegirl_plus/views/edit/index.dart';
 import 'package:moegirl_plus/views/image_previewer/index.dart';
 import 'package:one_context/one_context.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:vibration/vibration.dart';
 
 import '../styled_widgets/circular_progress_indicator.dart';
 import 'utils/collect_data_from_html.dart';
@@ -81,7 +79,7 @@ class ArticleView extends StatefulWidget {
   _ArticleViewState createState() => _ArticleViewState();
 }
 
-class _ArticleViewState extends State<ArticleView> with ProviderChangeChecker {  
+class _ArticleViewState extends State<ArticleView> {  
   dynamic articleData;
   List<String> injectedStyles;
   List<String> injectedScripts;
@@ -109,35 +107,30 @@ class _ArticleViewState extends State<ArticleView> with ProviderChangeChecker {
     }
 
     // 监听设置项heimu的变化
-    addChangeChecker<SettingsProviderModel, bool>(
-      provider: settingsProvider,
-      selector: (provider) => provider.heimu,
-      handler: (value) {
-        injectScript('moegirl.config.heimu.\$enabled = ${value.toString()}');
-      }
-    );
+    autorun((_) {
+      final heimuEnabled = settingsStore.heimu.toString();
+      injectScript('moegirl.config.heimu.\$enabled = $heimuEnabled');
+    });
 
     // 监听设置项theme的变化
-    addChangeChecker<SettingsProviderModel, String>(
-      provider: settingsProvider,
-      selector: (provider) => provider.theme,
-      handler: (value) {
-        final theme = themes[value];
-        final isNightTheme = value == 'night';
+    autorun((_) {
+      final theme = themes[settingsStore.theme];
+      final isNightTheme = settingsStore.theme == 'night';
+
+      injectScript('''
+        moegirl.config.nightTheme.\$enabled = ${isNightTheme.toString()}
+      ''');
+
+      if (!isNightTheme) {
         injectScript('''
-          moegirl.config.nightTheme.\$enabled = ${isNightTheme.toString()}
+          \$(':root').css({
+            '--color-primary': '${color2rgbCss(theme.primaryColor)}',
+            '--color-dark': '${color2rgbCss(theme.primaryColorDark)}',
+            '--color-light': '${color2rgbCss(theme.primaryColorLight)}'
+          })
         ''');
-        if (!isNightTheme) {
-          injectScript('''
-            \$(':root').css({
-              '--color-primary': '${color2rgbCss(theme.primaryColor)}',
-              '--color-dark': '${color2rgbCss(theme.primaryColorDark)}',
-              '--color-light': '${color2rgbCss(theme.primaryColorLight)}'
-            })
-          ''');
-        }
       }
-    );
+    });
   }
   
   Future loadArticleContent(String pageName, [bool forceLoad = false]) async {
@@ -166,7 +159,7 @@ class _ArticleViewState extends State<ArticleView> with ProviderChangeChecker {
       }
 
       // 在非强制加载、非讨论页、非加载历史页面、有缓存的情况下，使用缓存
-      if (!forceLoad && !isTalkPage(pageInfo['ns']) && widget.revId == null && settingsProvider.cachePriority) {
+      if (!forceLoad && !isTalkPage(pageInfo['ns']) && widget.revId == null && settingsStore.cachePriority) {
         // 使用缓存
         final articleCache = await ArticleCacheManager.getCache(pageName);
         if (articleCache != null) {
@@ -265,9 +258,9 @@ class _ArticleViewState extends State<ArticleView> with ProviderChangeChecker {
       pageName: widget.pageName,
       categories: categories,
       enbaledHeightObserver: widget.fullHeight,
-      heimu: settingsProvider.heimu,
+      heimu: settingsStore.heimu,
       addCopyright: !widget.inDialogMode && widget.addCopyright,
-      nightMode: settingsProvider.theme == 'night'
+      nightMode: settingsStore.theme == 'night'
     );
 
     final theme = Theme.of(OneContext().context);
@@ -379,7 +372,7 @@ class _ArticleViewState extends State<ArticleView> with ProviderChangeChecker {
             return;
           }
 
-          if (!accountProvider.isLoggedIn) {
+          if (!accountStore.isLoggedIn) {
             final result = await showAlert(
               content: '未登录无法进行编辑，要前往登录界面吗？'
             );

@@ -1,14 +1,12 @@
 import 'package:after_layout/after_layout.dart';
 import 'package:flutter/material.dart';
+import 'package:mobx/mobx.dart';
 import 'package:moegirl_plus/api/watch_list.dart';
 import 'package:moegirl_plus/components/article_view/index.dart';
 import 'package:moegirl_plus/generated/l10n.dart';
-import 'package:moegirl_plus/providers/account.dart';
-import 'package:moegirl_plus/providers/comment.dart';
-import 'package:moegirl_plus/providers/settings.dart';
+import 'package:moegirl_plus/mobx/index.dart';
 import 'package:moegirl_plus/utils/check_if_nonauto_confirmed_to_show_edit_alert.dart';
 import 'package:moegirl_plus/utils/media_wiki_namespace.dart';
-import 'package:moegirl_plus/utils/provider_change_checker.dart';
 import 'package:moegirl_plus/utils/reading_history_manager.dart';
 import 'package:moegirl_plus/utils/route_aware.dart';
 import 'package:moegirl_plus/utils/status_bar_height.dart';
@@ -22,7 +20,6 @@ import 'package:moegirl_plus/views/drawer/index.dart';
 import 'package:moegirl_plus/views/edit/index.dart';
 import 'package:moegirl_plus/views/edit_history/index.dart';
 import 'package:one_context/one_context.dart';
-import 'package:provider/provider.dart';
 import 'package:share/share.dart';
 
 import 'components/comment_button/index.dart';
@@ -58,7 +55,6 @@ class ArticlePage extends StatefulWidget {
 class _ArticlePageState extends State<ArticlePage> with 
   RouteAware, 
   SubscriptionForRouteAware,
-  ProviderChangeChecker,
   AfterLayoutMixin
 {
   S get i10n => S.of(context);
@@ -78,7 +74,7 @@ class _ArticlePageState extends State<ArticlePage> with
 
   bool enabledHeaderMoreButton = false; // 加载完毕确认条目真实存在之前禁用更多按钮
   // 这里要存一个不变的值，防止用户改变stopAudioOnLeave的设置后，前后值不一致造成麻烦
-  final stopAudioOnLeave = settingsProvider.stopAudioOnLeave;
+  final stopAudioOnLeave = settingsStore.stopAudioOnLeave;
   // 用于编程式打开条目目录
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -95,26 +91,22 @@ class _ArticlePageState extends State<ArticlePage> with
     displayPageName = widget.routeArgs.displayPageName ?? widget.routeArgs.pageName;
 
     // 监听评论状态变化，播放评论按钮ripple动画
-    var isRipplePlayed = false; // 只播放一次，防止下拉刷新之后回来再播一次动画
-    addChangeChecker<CommentProviderModel, num>(
-      provider: commentProvider, 
-      selector: (provider) => provider.data[pageId]?.status ?? 1,
-      shouldExec: (prevVal, newVal) => prevVal == 2.1 && newVal >= 3,
-      handler: (value) {
-        if (isRipplePlayed) return;
+    var prevpageCommentStatus = 1;
+    autorun((reaction) {
+      final commentStatus = commentStore.data[pageId]?.status ?? 1;
+
+      if (prevpageCommentStatus == 2.1 && commentStatus >= 3) {
         commentButtonController.ripple();
-        isRipplePlayed = true;
+        reaction.dispose(); // 只播放一次，防止下拉刷新之后回来再播一次动画
       }
-    );
+
+      prevpageCommentStatus = commentStatus;
+    });
 
     // 监听登录状态变化，重新检查编辑权限
-    addChangeChecker<AccountProviderModel, bool>(
-      provider: accountProvider, 
-      selector: (provider) => provider.isLoggedIn, 
-      handler: (value) {
-        if (value) setStateFromPageInfo(pageInfo);
-      }
-    );
+    autorun((_) {
+      if (accountStore.isLoggedIn) setStateFromPageInfo(pageInfo);
+    });
   }
 
   @override
@@ -166,8 +158,8 @@ class _ArticlePageState extends State<ArticlePage> with
     await setStateFromPageInfo(pageInfo);
 
     if (visibleCommentButton) {
-      if (commentProvider.data[pageId] == null) {
-        commentProvider.loadNext(pageId);
+      if (commentStore.data[pageId] == null) {
+        commentStore.loadNext(pageId);
       }
 
       commentButtonController.show();
@@ -185,8 +177,8 @@ class _ArticlePageState extends State<ArticlePage> with
   Future<void> setStateFromPageInfo(dynamic pageInfo) async {
 
     bool editAllowed = false;
-    if (accountProvider.isLoggedIn) {
-      final userInfo = await accountProvider.getUserInfo();
+    if (accountStore.isLoggedIn) {
+      final userInfo = await accountStore.getUserInfo();
       final isUnprotectednessPage = pageInfo['protection'].every((item) => item['type'] != 'edit');
       final isSysop = userInfo['groups'].contains('sysop');
       final isPatroller = userInfo['groups'].contains('patroller');
@@ -301,9 +293,9 @@ class _ArticlePageState extends State<ArticlePage> with
   }
 
   void commentButtonWasPressed() {
-    final currentCommentData = commentProvider.data[pageId];
+    final currentCommentData = commentStore.data[pageId];
     if (currentCommentData.status == 0) {
-      commentProvider.loadNext(pageId);
+      commentStore.loadNext(pageId);
       return;
     }
     if ([2, 2.1].contains(currentCommentData.status)) {
@@ -326,7 +318,7 @@ class _ArticlePageState extends State<ArticlePage> with
   ''';
 
   String get commentButtonText {
-    final currentCommentData = Provider.of<CommentProviderModel>(context).data[pageId];
+    final currentCommentData = commentStore.data[pageId];
     var text = '...';
     if (currentCommentData != null) {
       if (currentCommentData.status == 0) text = '×';

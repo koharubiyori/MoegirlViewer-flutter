@@ -1,8 +1,11 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:moegirl_plus/components/provider_selectors/night_selector.dart';
 import 'package:moegirl_plus/components/structured_list_view.dart';
 import 'package:moegirl_plus/components/styled_widgets/app_bar_icon.dart';
+import 'package:moegirl_plus/mobx/comment/classes/comment_data/index.dart';
+import 'package:moegirl_plus/mobx/index.dart';
 import 'package:moegirl_plus/providers/account.dart';
 import 'package:moegirl_plus/providers/comment.dart';
 import 'package:moegirl_plus/utils/check_is_login.dart';
@@ -34,20 +37,20 @@ class CommentReplyPage extends StatefulWidget {
 class _CommentReplyPageState extends State<CommentReplyPage> {
   int get pageId => widget.routeArgs.pageId;
   String get commentId => widget.routeArgs.commentId;
-  Map get commentData => commentProvider.findByCommentId(pageId, commentId);
+  MobxCommentData get commentData => commentStore.findByCommentId(pageId, commentId);
   
   void addReply([String initialValue = '']) async {
     await checkIsLogin();
     
     final commentContent = await showCommentEditor(
-      targetName: commentData['username'],
+      targetName: commentData.userName,
       initialValue: initialValue,
       isReply: true
     );
     if (commentContent == null) return;
     showLoading(text: '提交中...');
     try {
-      await commentProvider.addComment(widget.routeArgs.pageId, commentContent, commentId);
+      await commentStore.addComment(widget.routeArgs.pageId, commentContent, commentId);
       toast('发布成功', position: ToastPosition.center);
     } catch(e) {
       if (!(e is DioError)) rethrow;
@@ -63,16 +66,12 @@ class _CommentReplyPageState extends State<CommentReplyPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
-    return Selector<CommentProviderModel, Map>(
-      selector: (_, provider) => provider.findByCommentId(
-        widget.routeArgs.pageId,
-        widget.routeArgs.commentId
-      ),
-      builder: (_, replyData, __) => (
-        Scaffold(
+    return Observer(
+      builder: (context) {
+        final replyData = commentStore.findByCommentId(pageId, commentId);
+        return Scaffold(
           appBar: AppBar(
-            title: Text('回复：${replyData['username']}'),
+            title: Text('回复：${replyData.userName}'),
             actions: [AppBarIcon(icon: Icons.reply, onPressed: addReply)],
             elevation: 0,
           ),
@@ -84,7 +83,7 @@ class _CommentReplyPageState extends State<CommentReplyPage> {
                   selector: (_, provider) => provider.findByCommentId(pageId, commentId)['children'].length,
                   builder: (_, __, ___) => (
                     StructuredListView(
-                      itemDataList: commentData['children'],
+                      itemDataList: commentData.children,
                       reverse: true,
                       
                       headerBuilder: () => (
@@ -98,7 +97,7 @@ class _CommentReplyPageState extends State<CommentReplyPage> {
                             ),
                             Padding(
                               padding: EdgeInsets.all(10).copyWith(top: 9),
-                              child: Text('共${commentData['children'].length}条回复',
+                              child: Text('共${commentData.children.length}条回复',
                                 style: TextStyle(
                                   color: theme.hintColor,
                                   fontSize: 17
@@ -137,8 +136,8 @@ class _CommentReplyPageState extends State<CommentReplyPage> {
               )
             )
           ),
-        )
-      ),
+        );
+      },
     );
   }
 }

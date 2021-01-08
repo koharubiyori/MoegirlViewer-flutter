@@ -18,6 +18,7 @@ import 'package:one_context/one_context.dart';
 import 'package:provider/provider.dart';
 import 'generated/l10n.dart';
 
+import 'mobx/index.dart';
 import 'utils/route_aware.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,6 +26,7 @@ void main() async {
   // 等待必要数据加载完毕，注意避免出现数据互相等待的情况
   await Future.wait([
     prefReady,
+    mobxReady,
     moeRequestReady
   ]);
 

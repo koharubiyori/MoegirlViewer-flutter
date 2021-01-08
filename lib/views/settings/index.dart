@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart' hide showAboutDialog;
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:moegirl_plus/components/provider_selectors/logged_in_selector.dart';
 import 'package:moegirl_plus/components/styled_widgets/app_bar_back_button.dart';
 import 'package:moegirl_plus/components/styled_widgets/app_bar_title.dart';
 import 'package:moegirl_plus/generated/l10n.dart';
+import 'package:moegirl_plus/mobx/index.dart';
 import 'package:moegirl_plus/providers/account.dart';
 import 'package:moegirl_plus/providers/settings.dart';
 import 'package:moegirl_plus/utils/article_cache_manager.dart';
@@ -58,20 +60,20 @@ class _SettingsPageState extends State<SettingsPage> {
   void showThemeDialog() async {
     final result = await showThemeSelectionDialog(
       context: context,
-      initialValue: settingsProvider.theme, 
-      onChange: (value) => settingsProvider.theme = value
+      initialValue: settingsStore.theme, 
+      onChange: (value) => settingsStore.theme = value
     );
 
-    settingsProvider.theme = result;
+    settingsStore.theme = result;
   }
 
   void showLanguageDialog() async {
     final result = await showLanguageSelectionDialog(
       context: context,
-      initialValue: settingsProvider.lang, 
+      initialValue: settingsStore.lang, 
     );
 
-    settingsProvider.lang = result;
+    settingsStore.lang = result;
   }
 
   void toggleLoginStatus(bool isLoggedIn) async {
@@ -112,8 +114,8 @@ class _SettingsPageState extends State<SettingsPage> {
       ),
       body: Container(
         child: SingleChildScrollView(
-          child: Consumer<SettingsProviderModel>(
-            builder: (_, settingsProvider, __) => (
+          child: Observer(
+            builder: (context) => (
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -121,19 +123,19 @@ class _SettingsPageState extends State<SettingsPage> {
                   SettingsPageItem(
                     title: '黑幕开关',
                     subtext: '关闭后黑幕将默认为刮开状态',
-                    onPressed: () => settingsProvider.heimu = !settingsProvider.heimu,
+                    onPressed: () => settingsStore.heimu = !settingsStore.heimu,
                     rightWidget: Switch(
-                      value: settingsProvider.heimu,
-                      onChanged: (value) => settingsProvider.heimu = value,
+                      value: settingsStore.heimu,
+                      onChanged: (value) => settingsStore.heimu = value,
                     ),
                   ),
                   SettingsPageItem(
                     title: '停止旧页面背景媒体',
                     subtext: '打开新条目时停止旧条目上的音频和视频',
-                    onPressed: () => settingsProvider.stopAudioOnLeave = !settingsProvider.stopAudioOnLeave,
+                    onPressed: () => settingsStore.stopAudioOnLeave = !settingsStore.stopAudioOnLeave,
                     rightWidget: Switch(
-                      value: settingsProvider.stopAudioOnLeave,
-                      onChanged: (value) => settingsProvider.stopAudioOnLeave = value,
+                      value: settingsStore.stopAudioOnLeave,
+                      onChanged: (value) => settingsStore.stopAudioOnLeave = value,
                     ),
                   ),
                   title('界面'),
@@ -149,10 +151,10 @@ class _SettingsPageState extends State<SettingsPage> {
                   SettingsPageItem(
                     title: '缓存优先模式',
                     subtext: '如果有条目有缓存将优先使用',
-                    onPressed: () => settingsProvider.cachePriority = !settingsProvider.cachePriority,
+                    onPressed: () => settingsStore.cachePriority = !settingsStore.cachePriority,
                     rightWidget: Switch(
-                      value: settingsProvider.cachePriority,
-                      onChanged: (value) => settingsProvider.cachePriority = value,
+                      value: settingsStore.cachePriority,
+                      onChanged: (value) => settingsStore.cachePriority = value,
                     ),
                   ),
                   SettingsPageItem(

@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:moegirl_plus/api/article.dart';
-import 'package:moegirl_plus/providers/settings.dart';
+import 'package:moegirl_plus/mobx/index.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
@@ -102,7 +102,7 @@ Future<String> _basePath() async {
 Future<String> _createImagePath(String name, String imgSuffixName) async {
   final basePath = await _basePath();
   // final source = SettingsProvider.of(OneContext().context).source;
-  return p.join(basePath, _imageDirName, computeMd5(settingsProvider.source + name) + '.$imgSuffixName');
+  return p.join(basePath, _imageDirName, computeMd5(settingsStore.source + name) + '.$imgSuffixName');
 }
 
 Future<File> _getDataFile() async {

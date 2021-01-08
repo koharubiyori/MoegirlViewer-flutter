@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:after_layout/after_layout.dart';
 import 'package:flutter/material.dart';
-import 'package:moegirl_plus/providers/account.dart';
-import 'package:moegirl_plus/providers/settings.dart';
+import 'package:mobx/mobx.dart';
+import 'package:moegirl_plus/mobx/index.dart';
 import 'package:moegirl_plus/themes.dart';
 import 'package:moegirl_plus/utils/provider_change_checker.dart';
 import 'package:moegirl_plus/utils/ui/set_status_bar.dart';
@@ -25,39 +25,31 @@ mixin AppInit<T extends StatefulWidget> on
     // S.load(Locale(language[0], language[1]));
     
     // 初始化用户信息，开始轮询检查等待通知
-    if (accountProvider.isLoggedIn) {
+    if (accountStore.isLoggedIn) {
       initUserInfo();
     } 
 
-    if (settingsProvider.theme == 'night') {
+    if (settingsStore.isNightTheme) {
       setNavigationBarStyle(nightPrimaryColor, Brightness.light);
     }
 
     // 监听登录状态，更新用户信息及启动或关闭轮询检查等待通知
-    addChangeChecker<AccountProviderModel, bool>(
-      provider: accountProvider,
-      selector: (provider) => provider.isLoggedIn,
-      handler: (isLoggedIn) {
-        if (isLoggedIn) {
-          initUserInfo();
-        } else {
-          _notificationCheckingTimer.cancel();
-        }
+    autorun((_) {
+      if (accountStore.isLoggedIn) {
+        initUserInfo();
+      } else {
+        _notificationCheckingTimer.cancel();
       }
-    );
-
+    });
+    
     // 监听主题变化，修改底部导航栏样式
-    addChangeChecker<SettingsProviderModel, bool>(
-      provider: settingsProvider, 
-      selector: (provider) => provider.theme == 'night', 
-      handler: (isNight) {
-        setNavigationBarStyle(
-          isNight ? nightPrimaryColor : Colors.white,
-          isNight ? Brightness.light : Brightness.light
-        );
-      }
-    );
-
+    autorun((_) {
+      setNavigationBarStyle(
+        settingsStore.isNightTheme ? nightPrimaryColor : Colors.white,
+        settingsStore.isNightTheme ? Brightness.light : Brightness.light
+      );
+    });
+    
     // 监听语言变化
     // addChangeChecker<SettingsProviderModel, String>(
     //   provider: settingsProvider,
@@ -70,13 +62,13 @@ mixin AppInit<T extends StatefulWidget> on
   }
 
   void initUserInfo() {
-    accountProvider.getUserInfo();
-    accountProvider.checkWaitingNotificationTotal();
+    accountStore.getUserInfo();
+    accountStore.checkWaitingNotificationTotal();
     WatchListManager.refreshList();
 
     _notificationCheckingTimer = Timer.periodic(Duration(seconds: 30), (_) {
       try {
-        accountProvider.checkWaitingNotificationTotal();
+        accountStore.checkWaitingNotificationTotal();
       } catch(e) {
         print('轮询检查等待通知失败');
         print(e);

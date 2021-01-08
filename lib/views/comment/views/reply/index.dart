@@ -1,20 +1,16 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:moegirl_plus/components/provider_selectors/night_selector.dart';
 import 'package:moegirl_plus/components/structured_list_view.dart';
 import 'package:moegirl_plus/components/styled_widgets/app_bar_icon.dart';
 import 'package:moegirl_plus/mobx/comment/classes/comment_data/index.dart';
 import 'package:moegirl_plus/mobx/index.dart';
-import 'package:moegirl_plus/providers/account.dart';
-import 'package:moegirl_plus/providers/comment.dart';
 import 'package:moegirl_plus/utils/check_is_login.dart';
 import 'package:moegirl_plus/utils/ui/dialog/loading.dart';
 import 'package:moegirl_plus/utils/ui/toast/index.dart';
 import 'package:moegirl_plus/views/comment/components/item.dart';
 import 'package:moegirl_plus/views/comment/utils/show_comment_editor/index.dart';
 import 'package:one_context/one_context.dart';
-import 'package:provider/provider.dart';
 
 class CommentReplyPageRouteArgs {
   final int pageId;
@@ -75,66 +71,57 @@ class _CommentReplyPageState extends State<CommentReplyPage> {
             actions: [AppBarIcon(icon: Icons.reply, onPressed: addReply)],
             elevation: 0,
           ),
-          body: NightSelector(
-            builder: (isNight) => (
-              Container(
-                color: isNight ? theme.backgroundColor : Color(0xffeeeeee),
-                child: Selector<CommentProviderModel, int>(
-                  selector: (_, provider) => provider.findByCommentId(pageId, commentId)['children'].length,
-                  builder: (_, __, ___) => (
-                    StructuredListView(
-                      itemDataList: commentData.children,
-                      reverse: true,
-                      
-                      headerBuilder: () => (
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            CommentPageItem(
-                              isReply: true,
-                              pageId: pageId,
-                              commentData: commentData,
-                            ),
-                            Padding(
-                              padding: EdgeInsets.all(10).copyWith(top: 9),
-                              child: Text('共${commentData.children.length}条回复',
-                                style: TextStyle(
-                                  color: theme.hintColor,
-                                  fontSize: 17
-                                ),
-                              ),
-                            )
-                          ],
-                        )
-                      ),
-
-                      itemBuilder: (_, itemData, index) => (
-                        CommentPageItem(
-                          pageId: pageId,
-                          commentData: itemData,
-                          rootCommentId: commentId,
-                          visibleRpleyButton: true,
-                          visibleDelButton: accountProvider.userName == itemData['username'],
-                        )
-                      ),
-
-                      footerBuilder: () => (
-                        Container(
-                          alignment: Alignment.center,
-                          padding: EdgeInsets.symmetric(vertical: 20).copyWith(top: 19),
-                          child: Text('已经没有啦',
-                            style: TextStyle(
-                              color: theme.disabledColor,
-                              fontSize: 17
-                            )
-                          ),
-                        )
+          body: Container(
+            color: settingsStore.isNightTheme ? theme.backgroundColor : Color(0xffeeeeee),
+            child: StructuredListView(
+              itemDataList: commentData.children,
+              reverse: true,
+              
+              headerBuilder: () => (
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CommentPageItem(
+                      isReply: true,
+                      pageId: pageId,
+                      commentData: commentData,
+                    ),
+                    Padding(
+                      padding: EdgeInsets.all(10).copyWith(top: 9),
+                      child: Text('共${commentData.children.length}条回复',
+                        style: TextStyle(
+                          color: theme.hintColor,
+                          fontSize: 17
+                        ),
                       ),
                     )
+                  ],
+                )
+              ),
+
+              itemBuilder: (_, itemData, index) => (
+                CommentPageItem(
+                  pageId: pageId,
+                  commentData: itemData,
+                  rootCommentId: commentId,
+                  visibleRpleyButton: true,
+                  visibleDelButton: accountStore.userName == itemData['username'],
+                )
+              ),
+
+              footerBuilder: () => (
+                Container(
+                  alignment: Alignment.center,
+                  padding: EdgeInsets.symmetric(vertical: 20).copyWith(top: 19),
+                  child: Text('已经没有啦',
+                    style: TextStyle(
+                      color: theme.disabledColor,
+                      fontSize: 17
+                    )
                   ),
-                ),
-              )
-            )
+                )
+              ),
+            ),
           ),
         );
       },

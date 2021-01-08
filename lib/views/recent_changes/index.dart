@@ -2,18 +2,17 @@ import 'package:after_layout/after_layout.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:moegirl_plus/api/edit_record.dart';
 import 'package:moegirl_plus/api/watch_list.dart';
-import 'package:moegirl_plus/components/provider_selectors/logged_in_selector.dart';
-import 'package:moegirl_plus/components/provider_selectors/night_selector.dart';
 import 'package:moegirl_plus/components/structured_list_view.dart';
 import 'package:moegirl_plus/components/styled_widgets/app_bar_back_button.dart';
 import 'package:moegirl_plus/components/styled_widgets/app_bar_icon.dart';
 import 'package:moegirl_plus/components/styled_widgets/app_bar_title.dart';
 import 'package:moegirl_plus/components/styled_widgets/refresh_indicator.dart';
 import 'package:moegirl_plus/components/styled_widgets/scrollbar.dart';
+import 'package:moegirl_plus/mobx/index.dart';
 import 'package:moegirl_plus/prefs/index.dart';
-import 'package:moegirl_plus/providers/account.dart';
 import 'package:moegirl_plus/request/moe_request.dart';
 import 'package:moegirl_plus/utils/ui/toast/index.dart';
 import 'package:moegirl_plus/utils/watch_list_manager.dart';
@@ -73,7 +72,7 @@ class _RecentChangesPageState extends State<RecentChangesPage> with AfterLayoutM
       final options = recentChangesOptions;
       List changesData = [];
 
-      if (isWatchListMode && accountProvider.isLoggedIn) {
+      if (isWatchListMode && accountStore.isLoggedIn) {
         changesData = await WatchListApi.getChanges(
           startISO: DateTime.now().subtract(Duration(days: options.daysAgo)).toIso8601String(),
           limit: options.totalLimit,
@@ -84,7 +83,7 @@ class _RecentChangesPageState extends State<RecentChangesPage> with AfterLayoutM
         changesData = await EditRecordApi.getRecentChanges(
           startISO: DateTime.now().subtract(Duration(days: options.daysAgo)).toIso8601String(),
           limit: options.totalLimit,
-          excludeUser: !options.includeSelf && accountProvider.isLoggedIn ? accountProvider.userName : null,
+          excludeUser: !options.includeSelf && accountStore.isLoggedIn ? accountStore.userName : null,
           includeMinor: options.includeMinor,
           includeRobot: options.includeRobot
         ); 
@@ -165,15 +164,15 @@ class _RecentChangesPageState extends State<RecentChangesPage> with AfterLayoutM
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     
-    return LoggedInSelector(
-      builder: (isLoggedIn) => (
+    return Observer(
+      builder: (context) => (
         Scaffold(
           appBar: AppBar(
             elevation: 0,
             title: AppBarTitle('最近更改'),
             leading: AppBarBackButton(),
             actions: [
-              if (isLoggedIn) (
+              if (accountStore.isLoggedIn) (
                 AppBarIcon(
                   icon: isWatchListMode ? MaterialCommunityIcons.eye : Icons.format_indent_decrease,
                   onPressed: toggleMode,
@@ -186,46 +185,42 @@ class _RecentChangesPageState extends State<RecentChangesPage> with AfterLayoutM
               )
             ],
           ),
-          body: NightSelector(
-            builder: (isNight) => (
-              Container(
-                color: isNight ? theme.backgroundColor : Color(0xffeeeeee),
-                child: StyledScrollbar(
-                  child: StyledRefreshIndicator(
-                    bodyKey: refreshIndicatorKey,
-                    onRefresh: loadChanges,
-                    child: StructuredListView(
-                      itemDataList: changesList,          
-                      itemBuilder: (context, itemData, index) {
-                        if (itemData is String) {
-                          return Container(
-                            margin: EdgeInsets.only(top: 7, bottom: 8, left: 10),
-                            child: Text(itemData,
-                              style: TextStyle(
-                                fontSize: 16
-                              ),
-                            ),
-                          ); 
-                        } else {
-                          return RecentChangesItem(
-                            type: itemData['type'],
-                            pageName: itemData['title'],
-                            comment: itemData['comment'],
-                            users: itemData['users'],
-                            newLength: itemData['newlen'],
-                            oldLength: itemData['oldlen'],
-                            revId: itemData['revid'],
-                            oldRevId: itemData['old_revid'],
-                            dateISO: itemData['timestamp'],
-                            editDetails: itemData['details'],
-                            pageWatched: (isWatchListMode && isLoggedIn) ? false : watchList.contains(itemData['title']),
-                          );
-                        }
-                      },
-                    ),
-                  ),
+          body: Container(
+            color: settingsStore.isNightTheme ? theme.backgroundColor : Color(0xffeeeeee),
+            child: StyledScrollbar(
+              child: StyledRefreshIndicator(
+                bodyKey: refreshIndicatorKey,
+                onRefresh: loadChanges,
+                child: StructuredListView(
+                  itemDataList: changesList,          
+                  itemBuilder: (context, itemData, index) {
+                    if (itemData is String) {
+                      return Container(
+                        margin: EdgeInsets.only(top: 7, bottom: 8, left: 10),
+                        child: Text(itemData,
+                          style: TextStyle(
+                            fontSize: 16
+                          ),
+                        ),
+                      ); 
+                    } else {
+                      return RecentChangesItem(
+                        type: itemData['type'],
+                        pageName: itemData['title'],
+                        comment: itemData['comment'],
+                        users: itemData['users'],
+                        newLength: itemData['newlen'],
+                        oldLength: itemData['oldlen'],
+                        revId: itemData['revid'],
+                        oldRevId: itemData['old_revid'],
+                        dateISO: itemData['timestamp'],
+                        editDetails: itemData['details'],
+                        pageWatched: (isWatchListMode && accountStore.isLoggedIn) ? false : watchList.contains(itemData['title']),
+                      );
+                    }
+                  },
                 ),
-              )
+              ),
             ),
           )
         )

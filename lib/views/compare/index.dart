@@ -3,14 +3,15 @@ import 'dart:async';
 import 'package:after_layout/after_layout.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:moegirl_plus/api/edit.dart';
 import 'package:moegirl_plus/api/edit_record.dart';
 import 'package:moegirl_plus/components/indexed_view.dart';
-import 'package:moegirl_plus/components/provider_selectors/logged_in_selector.dart';
 import 'package:moegirl_plus/components/styled_widgets/app_bar_back_button.dart';
 import 'package:moegirl_plus/components/styled_widgets/app_bar_icon.dart';
 import 'package:moegirl_plus/components/styled_widgets/app_bar_title.dart';
 import 'package:moegirl_plus/components/styled_widgets/circular_progress_indicator.dart';
+import 'package:moegirl_plus/mobx/index.dart';
 import 'package:moegirl_plus/request/moe_request.dart';
 import 'package:moegirl_plus/utils/ui/dialog/loading.dart';
 import 'package:moegirl_plus/utils/ui/toast/index.dart';
@@ -133,14 +134,14 @@ class _ComparePageState extends State<ComparePage> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    return LoggedInSelector(
-      builder: (isLoggedIn) => (
+    return Observer(
+      builder: (context) => (
         Scaffold(
           appBar: AppBar(
             title: AppBarTitle('差异：${widget.routeArgs.pageName}'),
             leading: AppBarBackButton(),
             actions: [
-              if (isLoggedIn) (
+              if (accountStore.isLoggedIn) (
                 AppBarIcon(
                   icon: Icons.low_priority, 
                   onPressed: showUndoDialog

@@ -1,9 +1,10 @@
 import 'package:after_layout/after_layout.dart';
 import 'package:flutter/material.dart';
-import 'package:moegirl_plus/components/provider_selectors/night_selector.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:moegirl_plus/components/styled_widgets/scrollbar.dart';
 import 'package:moegirl_plus/components/touchable_opacity.dart';
 import 'package:moegirl_plus/constants.dart';
+import 'package:moegirl_plus/mobx/index.dart';
 import 'package:moegirl_plus/views/article/index.dart';
 import 'package:moegirl_plus/views/compare/utils/collect_diff_blocks_from_html.dart';
 import 'package:one_context/one_context.dart';
@@ -195,8 +196,8 @@ class _CompareDiffContentState extends State<CompareDiffContent> with AutomaticK
                                     ,
                                   ),
                                   
-                                  NightSelector(
-                                    builder: (isNight) => (
+                                  Observer(
+                                    builder: (context) => (
                                       Expanded(
                                         child: Container(
                                           // key: lineGlobalKeys[lineIndex][rowIndex],
@@ -205,7 +206,7 @@ class _CompareDiffContentState extends State<CompareDiffContent> with AutomaticK
                                           padding: EdgeInsets.only(left: 5, top: 3, bottom: 3),
                                           decoration: BoxDecoration(
                                             border: Border(
-                                              left: BorderSide(color: borderColors[isNight ? 'night' : 'normal'][row.marker], width: 5)
+                                              left: BorderSide(color: borderColors[settingsStore.isNightTheme ? 'night' : 'normal'][row.marker], width: 5)
                                             ),
                                           ),
                                           child: RichText(
@@ -217,7 +218,7 @@ class _CompareDiffContentState extends State<CompareDiffContent> with AutomaticK
                                                 TextSpan(
                                                   text: item.text,
                                                   style: TextStyle(
-                                                    backgroundColor: contentColors[isNight ? 'night' : 'normal'][item.type],
+                                                    backgroundColor: contentColors[settingsStore.isNightTheme ? 'night' : 'normal'][item.type],
                                                   )
                                                 )
                                               ).toList()

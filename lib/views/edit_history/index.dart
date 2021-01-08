@@ -1,13 +1,14 @@
 import 'package:after_layout/after_layout.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:moegirl_plus/api/edit_record.dart';
 import 'package:moegirl_plus/components/infinity_list_footer.dart';
-import 'package:moegirl_plus/components/provider_selectors/night_selector.dart';
 import 'package:moegirl_plus/components/structured_list_view.dart';
 import 'package:moegirl_plus/components/styled_widgets/app_bar_back_button.dart';
 import 'package:moegirl_plus/components/styled_widgets/app_bar_title.dart';
 import 'package:moegirl_plus/components/styled_widgets/refresh_indicator.dart';
 import 'package:moegirl_plus/components/styled_widgets/scrollbar.dart';
+import 'package:moegirl_plus/mobx/index.dart';
 import 'package:moegirl_plus/utils/add_infinity_list_loading_listener.dart';
 import 'package:moegirl_plus/views/edit_history/components/item.dart';
 
@@ -100,10 +101,10 @@ class _EditHistoryPageState extends State<EditHistoryPage> with AfterLayoutMixin
         title: AppBarTitle('版本历史：${widget.routeArgs.pageName}'),
         leading: AppBarBackButton(),
       ),
-      body: NightSelector(
-        builder: (isNight) => (
+      body: Observer(
+        builder: (context) => (
           Container(
-            color: isNight ? theme.backgroundColor : Color(0xffeeeeee),
+            color: settingsStore.isNightTheme ? theme.backgroundColor : Color(0xffeeeeee),
             child: StyledRefreshIndicator(
               bodyKey: refreshIndicatorKey,
               onRefresh: () => load(true),

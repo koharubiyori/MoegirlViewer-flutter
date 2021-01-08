@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_icons/flutter_icons.dart';
-import 'package:moegirl_plus/components/provider_selectors/logged_in_selector.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:moegirl_plus/mobx/index.dart';
 import 'package:moegirl_plus/prefs/index.dart';
-import 'package:moegirl_plus/providers/settings.dart';
 import 'package:moegirl_plus/utils/ui/dialog/alert.dart';
 import 'package:moegirl_plus/views/article/index.dart';
 import 'package:one_context/one_context.dart';
-import 'package:provider/provider.dart';
 
 class DrawerBody extends StatelessWidget {
   const DrawerBody({Key key}) : super(key: key);
@@ -24,12 +22,11 @@ class DrawerBody extends StatelessWidget {
   }
 
   void toggleNight() {
-    final isNight = settingsProvider.theme == 'night';
-    if (isNight) {
-      settingsProvider.theme = otherPref.lastTheme;
+    if (settingsStore.isNightTheme) {
+      settingsStore.theme = otherPref.lastTheme;
     } else {
-      otherPref.lastTheme = settingsProvider.theme;
-      settingsProvider.theme = 'night';
+      otherPref.lastTheme = settingsStore.theme;
+      settingsStore.theme = 'night';
     }
   }
 
@@ -65,34 +62,31 @@ class DrawerBody extends StatelessWidget {
       );
     }
     
-    return LoggedInSelector(
-      builder: (isLoggedIn) => (
-        SingleChildScrollView(
-          child: Column(
-            children: [
-              listItem(Icons.forum, '讨论版', () {
-                OneContext().pop();
-                OneContext().pushNamed('/article', arguments: ArticlePageRouteArgs(
-                  pageName: '萌娘百科 talk:讨论版'
-                ));
-              }),
-              listItem(Icons.format_indent_decrease, '最近更改', () {
-                OneContext().pop();
-                OneContext().pushNamed('/recentChanges');
-              }),
-              listItem(Icons.history, '浏览历史', () {
-                OneContext().pop();
-                OneContext().pushNamed('/history');
-              }),
-              listItem(Icons.touch_app, '操作提示', showOperationHelp),
-              Selector<SettingsProviderModel, bool>(
-                selector: (_, provider) => provider.theme == 'night',
-                builder: (_, isNight, __) => listItem(Icons.brightness_4, '${isNight ? '关闭' : '开启'}黑夜模式', toggleNight),
-              )
-            ],
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          listItem(Icons.forum, '讨论版', () {
+            OneContext().pop();
+            OneContext().pushNamed('/article', arguments: ArticlePageRouteArgs(
+              pageName: '萌娘百科 talk:讨论版'
+            ));
+          }),
+          listItem(Icons.format_indent_decrease, '最近更改', () {
+            OneContext().pop();
+            OneContext().pushNamed('/recentChanges');
+          }),
+          listItem(Icons.history, '浏览历史', () {
+            OneContext().pop();
+            OneContext().pushNamed('/history');
+          }),
+          listItem(Icons.touch_app, '操作提示', showOperationHelp),
+          Observer(
+            builder: (context) => (
+              listItem(Icons.brightness_4, '${settingsStore.isNightTheme ? '关闭' : '开启'}黑夜模式', toggleNight)
+            ),
           )
-        )
-      ),
+        ],
+      )
     );
   }
 }

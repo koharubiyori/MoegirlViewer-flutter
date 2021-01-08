@@ -2,8 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:moegirl_plus/components/capsule_checkbox.dart';
-import 'package:moegirl_plus/components/provider_selectors/logged_in_selector.dart';
+import 'package:moegirl_plus/mobx/index.dart';
 
 Future<RecentChangesOptions> showRecentChangesOptionsDialog(
   BuildContext context, 
@@ -129,12 +130,12 @@ class _OptionsDialogState extends State<_OptionsDialog> {
                 ),
               ),
               Container(height: 5),
-              LoggedInSelector(
-                builder: (isLoggedIn) => (
+              Observer(
+                builder: (context) => (
                   Container(
                     child: Wrap(
                       children: [
-                        if (isLoggedIn) (
+                        if (accountStore.isLoggedIn) (
                           Padding(
                             padding: EdgeInsets.only(right: 5, bottom: 5),
                             child: CapsuleCheckbox(

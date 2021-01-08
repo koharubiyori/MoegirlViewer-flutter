@@ -4,15 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:moegirl_plus/api/comment.dart';
-import 'package:moegirl_plus/components/provider_selectors/night_selector.dart';
 import 'package:moegirl_plus/components/touchable_opacity.dart';
 import 'package:moegirl_plus/constants.dart';
 import 'package:moegirl_plus/mobx/comment/classes/comment_data/index.dart';
 import 'package:moegirl_plus/mobx/index.dart';
-import 'package:moegirl_plus/providers/account.dart';
-import 'package:moegirl_plus/providers/comment.dart';
 import 'package:moegirl_plus/utils/check_is_login.dart';
-import 'package:moegirl_plus/utils/comment_tree.dart';
 import 'package:moegirl_plus/utils/diff_date.dart';
 import 'package:moegirl_plus/utils/trim_html.dart';
 import 'package:moegirl_plus/utils/ui/dialog/alert.dart';
@@ -22,7 +18,6 @@ import 'package:moegirl_plus/views/article/index.dart';
 import 'package:moegirl_plus/views/comment/utils/show_comment_editor/index.dart';
 import 'package:moegirl_plus/views/comment/views/reply/index.dart';
 import 'package:one_context/one_context.dart';
-import 'package:provider/provider.dart';
 
 const replyHeaderHeroTag = 'replyHeaderHeroTag';
 
@@ -349,13 +344,13 @@ class CommentPageItem extends StatelessWidget {
 
                         // 回复
                         if (visibleReply && commentData.children.length != 0) (
-                          NightSelector(
+                          Observer(
                             builder: (isNight) => (
                               Container(
                                 alignment: Alignment.topLeft,
                                 margin: EdgeInsets.only(top: 10, right: 25, bottom: 5),
                                 padding: EdgeInsets.all(10),
-                                color: isNight ? theme.backgroundColor : Color(0xffededed),
+                                color: settingsStore.isNightTheme ? theme.backgroundColor : Color(0xffededed),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -420,13 +415,4 @@ class CommentPageItem extends StatelessWidget {
       ),
     );
   }
-}
-
-class _ProviderSelectedLikeData {
-  final int likeNumber;
-  final bool liked;
-  
-  _ProviderSelectedLikeData(this.likeNumber, this.liked);
-
-  bool equal(_ProviderSelectedLikeData likeData) => likeData.likeNumber == likeNumber && likeData.liked == liked;
 }

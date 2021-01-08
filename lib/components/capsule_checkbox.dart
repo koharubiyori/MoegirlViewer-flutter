@@ -1,7 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:moegirl_plus/components/provider_selectors/night_selector.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:moegirl_plus/components/touchable_opacity.dart';
+import 'package:moegirl_plus/mobx/index.dart';
 
 class CapsuleCheckbox extends StatefulWidget {
   final String title;
@@ -34,13 +35,13 @@ class _CapsuleCheckboxState extends State<CapsuleCheckbox> {
     
     return TouchableOpacity(
       onPressed: () => widget.onPressed(!widget.value),
-      child: NightSelector(
-        builder: (isNight) => (
+      child: Observer(
+        builder: (context) => (
           Container(
             height: 34,
             padding: EdgeInsets.only(left: 7, right: 3),
             decoration: BoxDecoration(
-              color: isNight ? theme.dividerColor : theme.primaryColor,
+              color: settingsStore.isNightTheme ? theme.dividerColor : theme.primaryColor,
               borderRadius: BorderRadius.all(Radius.circular(17))
             ),
             child: IntrinsicWidth(
@@ -53,12 +54,12 @@ class _CapsuleCheckboxState extends State<CapsuleCheckbox> {
                       height: 24,
                       child: Theme(
                         data: ThemeData(
-                          unselectedWidgetColor: isNight ? theme.disabledColor : theme.primaryColorDark,
+                          unselectedWidgetColor: settingsStore.isNightTheme ? theme.disabledColor : theme.primaryColorDark,
                         ),
                         child: Checkbox(
                           focusNode: focusNode,
                           activeColor: theme.colorScheme.onPrimary,
-                          checkColor: isNight ? theme.primaryColor : theme.accentColor,
+                          checkColor: settingsStore.isNightTheme ? theme.primaryColor : theme.accentColor,
                           value: widget.value,
                           onChanged:widget. onPressed,
                         ),

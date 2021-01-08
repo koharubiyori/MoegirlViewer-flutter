@@ -1,7 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:moegirl_plus/components/provider_selectors/night_selector.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:moegirl_plus/components/touchable_opacity.dart';
+import 'package:moegirl_plus/mobx/index.dart';
 
 class CategoryPageItem extends StatelessWidget {
   final String pageName;
@@ -56,18 +57,18 @@ class CategoryPageItem extends StatelessWidget {
                             children: categories.map((category) =>
                               TouchableOpacity(
                                 onPressed: () => onCategoryPressed(category),
-                                child: NightSelector(
-                                  builder: (isNight) => (
+                                child: Observer(
+                                  builder: (context) => (
                                     IntrinsicWidth(
                                       child: Container(
                                         margin: EdgeInsets.only(right: 5, bottom: 5),
                                         padding: EdgeInsets.symmetric(vertical: 3, horizontal: 3),
-                                        color: isNight ? theme.dividerColor.withOpacity(0.5) : theme.primaryColor,
+                                        color: settingsStore.isNightTheme ? theme.dividerColor.withOpacity(0.5) : theme.primaryColor,
                                         alignment: Alignment.center,
                                         child: Text(category,
                                           style: TextStyle(
                                             height: 1.1,
-                                            color: isNight ? theme.textTheme.bodyText1.color : Colors.white,
+                                            color: settingsStore.isNightTheme ? theme.textTheme.bodyText1.color : Colors.white,
                                             fontSize: 10,
                                           ),
                                         ),
@@ -95,12 +96,12 @@ class CategoryPageItem extends StatelessWidget {
                     )
                   )
                 :
-                  NightSelector(
-                    builder: (isNight) => (
+                  Observer(
+                    builder: (context) => (
                         Container(
                         width: 120,
                         height: 150,
-                        color: isNight ? Color(0xff5b5b5b) : Color(0xffe2e2e2),
+                        color: settingsStore.isNightTheme ? Color(0xff5b5b5b) : Color(0xffe2e2e2),
                         alignment: Alignment.center,
                         child: Text('暂无图片',
                           style: TextStyle(

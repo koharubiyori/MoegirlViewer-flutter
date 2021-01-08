@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:moegirl_plus/components/article_view/index.dart';
 import 'package:moegirl_plus/components/badge.dart';
 import 'package:moegirl_plus/components/html_web_view/index.dart';
@@ -6,11 +7,10 @@ import 'package:moegirl_plus/components/styled_widgets/app_bar_icon.dart';
 import 'package:moegirl_plus/components/styled_widgets/app_bar_title.dart';
 import 'package:moegirl_plus/components/styled_widgets/refresh_indicator.dart';
 import 'package:moegirl_plus/generated/l10n.dart';
-import 'package:moegirl_plus/providers/account.dart';
+import 'package:moegirl_plus/mobx/index.dart';
 import 'package:moegirl_plus/utils/ui/toast/index.dart';
 import 'package:moegirl_plus/views/drawer/index.dart';
 import 'package:one_context/one_context.dart';
-import 'package:provider/provider.dart';
 
 class IndexPageRouteArgs {
   IndexPageRouteArgs();
@@ -66,9 +66,8 @@ class _IndexPageState extends State<IndexPage> {
         appBar: AppBar(
           elevation: 0,
           title: AppBarTitle(l10n.siteName),
-          leading: Selector<AccountProviderModel, int>(
-            selector: (_, provider) => provider.waitingNotificationTotal,
-            builder: (context, waitingNotificationTotal, _) => (
+          leading: Observer(
+            builder: (context) => (
               Stack(
                 alignment: Alignment.center,
                 children: [
@@ -76,7 +75,7 @@ class _IndexPageState extends State<IndexPage> {
                     icon: Icons.menu, 
                     onPressed: Scaffold.of(context).openDrawer
                   ),
-                  if (waitingNotificationTotal > 0) (
+                  if (accountStore.waitingNotificationTotal > 0) (
                     Positioned(
                       top: 13,
                       right: 11,
@@ -91,7 +90,7 @@ class _IndexPageState extends State<IndexPage> {
                   )
                 ],
               )
-            )
+            ),
           ),
           actions: [
             AppBarIcon(

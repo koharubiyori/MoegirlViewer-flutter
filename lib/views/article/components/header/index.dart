@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:moegirl_plus/components/provider_selectors/logged_in_selector.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:moegirl_plus/components/styled_widgets/app_bar_back_button.dart';
 import 'package:moegirl_plus/components/styled_widgets/app_bar_icon.dart';
 import 'package:moegirl_plus/components/styled_widgets/app_bar_title.dart';
 import 'package:moegirl_plus/generated/l10n.dart';
+import 'package:moegirl_plus/mobx/index.dart';
 import 'package:one_context/one_context.dart';
 
 import 'components/animation.dart';
@@ -49,8 +50,8 @@ class ArticlePageHeader extends StatelessWidget {
               icon: Icons.search, 
               onPressed: () => OneContext().pushNamed('search')
             )),
-            faded(LoggedInSelector(
-              builder: (isLoggedIn) => (
+            faded(Observer(
+              builder: (context) => (
                 PopupMenuButton(
                   icon: Icon(Icons.more_vert,
                     color: theme.colorScheme.onPrimary,
@@ -63,7 +64,7 @@ class ArticlePageHeader extends StatelessWidget {
                       value: ArticlePageHeaderMoreMenuValue.refresh,
                       child: Text(i10n.articlePage_header_moreMenuRefreshButton),
                     ),
-                    isLoggedIn ? 
+                    accountStore.isLoggedIn ? 
                       PopupMenuItem(
                         value: editFullDisabled ? ArticlePageHeaderMoreMenuValue.addSection : ArticlePageHeaderMoreMenuValue.edit,
                         enabled: editAllowed != null && editAllowed,
@@ -85,7 +86,7 @@ class ArticlePageHeader extends StatelessWidget {
                         child: Text(i10n.articlePage_header_moreMenuLoginButton)
                       )
                     ,
-                    if (isLoggedIn) (
+                    if (accountStore.isLoggedIn) (
                       PopupMenuItem(
                         value: ArticlePageHeaderMoreMenuValue.toggleWatchList,
                         child: Text(i10n.articlePage_header_moreMenuWatchListButton(isExistsInWatchList))

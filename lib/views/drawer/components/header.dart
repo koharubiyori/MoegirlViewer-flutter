@@ -2,14 +2,13 @@ import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:moegirl_plus/components/badge.dart';
-import 'package:moegirl_plus/components/provider_selectors/logged_in_selector.dart';
 import 'package:moegirl_plus/constants.dart';
-import 'package:moegirl_plus/providers/account.dart';
+import 'package:moegirl_plus/mobx/index.dart';
 import 'package:moegirl_plus/utils/status_bar_height.dart';
 import 'package:moegirl_plus/views/article/index.dart';
 import 'package:one_context/one_context.dart';
-import 'package:provider/provider.dart';
 
 const double avatarSize = 75;
 
@@ -18,9 +17,9 @@ class DrawerHeader extends StatelessWidget {
 
   void avatarOrUserNameWasClicked() {
     OneContext().pop();
-    if (accountProvider.isLoggedIn) {
+    if (accountStore.isLoggedIn) {
       OneContext().pushNamed('/article', arguments: ArticlePageRouteArgs(
-        pageName: 'User:' + accountProvider.userName
+        pageName: 'User:' + accountStore.userName
       ));
     } else {
       OneContext().pushNamed('/login');
@@ -30,8 +29,8 @@ class DrawerHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return LoggedInSelector(
-      builder: (isLoggedIn) => (
+    return Observer(
+      builder: (context) => (
         Container(
           alignment: Alignment.center,
           color: theme.primaryColor,
@@ -60,8 +59,8 @@ class DrawerHeader extends StatelessWidget {
                             ),
                             borderRadius: BorderRadius.all(Radius.circular(avatarSize / 2)),
                             image: DecorationImage(
-                              image: isLoggedIn ? 
-                                NetworkImage(avatarUrl + accountProvider.userName) :
+                              image: accountStore.isLoggedIn ? 
+                                NetworkImage(avatarUrl + accountStore.userName) :
                                 AssetImage('assets/images/akari.jpg')
                               ,
                             )
@@ -74,7 +73,7 @@ class DrawerHeader extends StatelessWidget {
                         padding: EdgeInsets.all(0),
                         child: Container(
                           margin: EdgeInsets.only(top: 10),
-                          child: Text(isLoggedIn ? '欢迎你，${accountProvider.userName}' : '登录/加入萌娘百科',
+                          child: Text(accountStore.isLoggedIn ? '欢迎你，${accountStore.userName}' : '登录/加入萌娘百科',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
@@ -88,37 +87,32 @@ class DrawerHeader extends StatelessWidget {
                   )
                 ),
 
-                if (isLoggedIn) (
+                if (accountStore.isLoggedIn) (
                   Positioned(
                     width: 50,
                     height: 50,
                     right: 10,
                     child: Material(
                       color: Colors.transparent,
-                      child: Selector<AccountProviderModel, int>(
-                        selector: (_, provider) => provider.waitingNotificationTotal,
-                        builder: (_, waitingNotificationTotal, __) => (
-                          Stack(
-                            children: [
-                              IconButton(
-                                splashRadius: 20,
-                                icon: Icon(Icons.notifications),
-                                color: theme.colorScheme.onPrimary,
-                                onPressed: () => OneContext().pushNamed('/notification')
-                              ),
+                      child: Stack(
+                        children: [
+                          IconButton(
+                            splashRadius: 20,
+                            icon: Icon(Icons.notifications),
+                            color: theme.colorScheme.onPrimary,
+                            onPressed: () => OneContext().pushNamed('/notification')
+                          ),
 
-                              if (waitingNotificationTotal > 0) (
-                                Positioned(
-                                  top: 9,
-                                  left: 26,
-                                  child: Badge(
-                                    text: waitingNotificationTotal.toString()
-                                  )
-                                )
+                          if (accountStore.waitingNotificationTotal > 0) (
+                            Positioned(
+                              top: 9,
+                              left: 26,
+                              child: Badge(
+                                text: accountStore.waitingNotificationTotal.toString()
                               )
-                            ],
+                            )
                           )
-                        ),
+                        ],
                       ),
                     )
                   )

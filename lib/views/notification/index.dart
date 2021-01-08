@@ -2,18 +2,16 @@ import 'package:after_layout/after_layout.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:moegirl_plus/api/notification.dart';
-import 'package:moegirl_plus/components/indexed_view.dart';
 import 'package:moegirl_plus/components/infinity_list_footer.dart';
-import 'package:moegirl_plus/components/provider_selectors/night_selector.dart';
 import 'package:moegirl_plus/components/structured_list_view.dart';
 import 'package:moegirl_plus/components/styled_widgets/app_bar_back_button.dart';
 import 'package:moegirl_plus/components/styled_widgets/app_bar_icon.dart';
 import 'package:moegirl_plus/components/styled_widgets/app_bar_title.dart';
-import 'package:moegirl_plus/components/styled_widgets/circular_progress_indicator.dart';
 import 'package:moegirl_plus/components/styled_widgets/refresh_indicator.dart';
 import 'package:moegirl_plus/components/styled_widgets/scrollbar.dart';
-import 'package:moegirl_plus/providers/account.dart';
+import 'package:moegirl_plus/mobx/index.dart';
 import 'package:moegirl_plus/request/moe_request.dart';
 import 'package:moegirl_plus/utils/add_infinity_list_loading_listener.dart';
 import 'package:moegirl_plus/utils/ui/dialog/loading.dart';
@@ -21,7 +19,6 @@ import 'package:moegirl_plus/utils/ui/toast/index.dart';
 import 'package:moegirl_plus/views/article/index.dart';
 import 'package:moegirl_plus/views/notification/components/item.dart';
 import 'package:one_context/one_context.dart';
-import 'package:provider/provider.dart';
 
 class NotificationPageRouteArgs {
   
@@ -99,7 +96,7 @@ class _NotificationPageState extends State<NotificationPage> with AfterLayoutMix
   void markAllAsReaded() async {
     showLoading();
     try {
-      await accountProvider.markAllNotificationAsRead();
+      await accountStore.markAllNotificationAsRead();
       setState(() => notificationList.forEach((item) => item['read'] = ''));
       toast('标记所有为已读');
     } catch(e) {
@@ -122,10 +119,10 @@ class _NotificationPageState extends State<NotificationPage> with AfterLayoutMix
         elevation: 0,
         actions: [AppBarIcon(icon: Icons.done_all, onPressed: markAllAsReaded)],
       ),
-      body: NightSelector(
-        builder: (isNight) => (
+      body: Observer(
+        builder: (context) => (
           Container(
-            color: isNight ? theme.backgroundColor : Color(0xffeeeeee),
+            color: settingsStore.isNightTheme ? theme.backgroundColor : Color(0xffeeeeee),
             child: StyledRefreshIndicator(
               bodyKey: refreshIndicatorKey,
               onRefresh: () => load(true),
@@ -134,17 +131,12 @@ class _NotificationPageState extends State<NotificationPage> with AfterLayoutMix
                   controller: scrollController,
                   itemDataList: notificationList,
                   itemBuilder: (context, itemData, index) => (
-                    Selector<AccountProviderModel, int>(
-                      selector: (_, provider) => provider.waitingNotificationTotal,
-                      builder: (_, __, ___) => (
-                        NotificationPageItem(
-                          notificationData: itemData,
-                          onPressed: () {
-                            if (itemData['title'] == null) return;
-                            OneContext().pushNamed('/article', arguments: ArticlePageRouteArgs(pageName: itemData['title']['full']));
-                          },
-                        )
-                      ),
+                    NotificationPageItem(
+                      notificationData: itemData,
+                      onPressed: () {
+                        if (itemData['title'] == null) return;
+                        OneContext().pushNamed('/article', arguments: ArticlePageRouteArgs(pageName: itemData['title']['full']));
+                      },
                     )
                   ),
 

@@ -3,14 +3,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:moegirl_plus/components/infinity_list_footer.dart';
-import 'package:moegirl_plus/components/provider_selectors/night_selector.dart';
 import 'package:moegirl_plus/components/structured_list_view.dart';
 import 'package:moegirl_plus/components/styled_widgets/app_bar_back_button.dart';
 import 'package:moegirl_plus/components/styled_widgets/app_bar_icon.dart';
 import 'package:moegirl_plus/components/styled_widgets/app_bar_title.dart';
 import 'package:moegirl_plus/components/styled_widgets/refresh_indicator.dart';
 import 'package:moegirl_plus/mobx/index.dart';
-import 'package:moegirl_plus/providers/account.dart';
 import 'package:moegirl_plus/utils/add_infinity_list_loading_listener.dart';
 import 'package:moegirl_plus/utils/check_is_login.dart';
 import 'package:moegirl_plus/utils/ui/dialog/loading.dart';
@@ -84,10 +82,10 @@ class _CommentPageState extends State<CommentPage> {
         elevation: 0,
         actions: [AppBarIcon(icon: Icons.add_comment, onPressed: addComment)],
       ),
-      body: NightSelector(
-        builder: (isNight) => (
+      body: Observer(
+        builder: (context) => (
           Container(
-            color: isNight ? theme.backgroundColor : Color(0xffeeeeee),
+            color: settingsStore.isNightTheme ? theme.backgroundColor : Color(0xffeeeeee),
             child: Observer(
               builder: (context) {
                 final commentData = commentStore.data[widget.routeArgs.pageId];
@@ -117,7 +115,7 @@ class _CommentPageState extends State<CommentPage> {
                               isPopular: true,
                               commentData: itemData,
                               pageId: widget.routeArgs.pageId,
-                              visibleDelButton: accountProvider.userName == itemData.userName,
+                              visibleDelButton: accountStore.userName == itemData.userName,
                               visibleRpleyButton: false,
                             )
                           ).toList(),

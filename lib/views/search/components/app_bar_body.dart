@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:moegirl_plus/components/provider_selectors/night_selector.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:moegirl_plus/mobx/index.dart';
 import 'package:moegirl_plus/prefs/index.dart';
 import 'package:moegirl_plus/prefs/search.dart';
 import 'package:moegirl_plus/views/search/views/result/index.dart';
@@ -47,7 +48,7 @@ class _SearchPageAppBarBodyState extends State<SearchPageAppBarBody> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return NightSelector(
+    return Observer(
       builder: (isNight) => (
         Row(
           children: [
@@ -59,12 +60,12 @@ class _SearchPageAppBarBodyState extends State<SearchPageAppBarBody> {
                   border: InputBorder.none,
                   hintText: '搜索萌娘百科...',
                   hintStyle: TextStyle(
-                    color: isNight ? theme.colorScheme.onPrimary : theme.hintColor
+                    color: settingsStore.isNightTheme ? theme.colorScheme.onPrimary : theme.hintColor
                   )
                 ),
                 style: TextStyle(
                   fontSize: 16,
-                  color: isNight ? theme.colorScheme.onPrimary : theme.textTheme.bodyText1.color
+                  color: settingsStore.isNightTheme ? theme.colorScheme.onPrimary : theme.textTheme.bodyText1.color
                 ),
                 controller: editingController,
                 onChanged: widget.onChanged,

@@ -2,7 +2,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:moegirl_plus/components/provider_selectors/night_selector.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:moegirl_plus/mobx/index.dart';
 import 'package:moegirl_plus/themes.dart';
 
 Future<String> showThemeSelectionDialog({
@@ -66,8 +67,8 @@ class _ThemeSelectionDialogState extends State<_ThemeSelectionDialog> {
       title: Text('选择主题'),
       backgroundColor: theme.colorScheme.surface,
       content: SingleChildScrollView(
-        child: NightSelector(
-          builder: (isNight) => (
+        child: Observer(
+          builder: (context) => (
             Wrap(
               alignment: WrapAlignment.center,
               children: themesData.map((item) =>
@@ -79,7 +80,7 @@ class _ThemeSelectionDialogState extends State<_ThemeSelectionDialog> {
                   decoration: BoxDecoration(
                     color: item.color,
                     borderRadius: BorderRadius.all(Radius.circular(50)),
-                    border: isNight ? Border.all(width: 3, color: theme.disabledColor) : null
+                    border: settingsStore.isNightTheme ? Border.all(width: 3, color: theme.disabledColor) : null
                   ),
                   child: Material(
                     color: Colors.transparent,

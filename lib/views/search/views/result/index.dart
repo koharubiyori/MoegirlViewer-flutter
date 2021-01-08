@@ -1,11 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:moegirl_plus/api/search.dart';
 import 'package:moegirl_plus/components/indexed_view.dart';
-import 'package:moegirl_plus/components/provider_selectors/night_selector.dart';
 import 'package:moegirl_plus/components/structured_list_view.dart';
 import 'package:moegirl_plus/components/styled_widgets/app_bar_back_button.dart';
 import 'package:moegirl_plus/components/styled_widgets/circular_progress_indicator.dart';
+import 'package:moegirl_plus/mobx/index.dart';
 import 'package:moegirl_plus/utils/add_infinity_list_loading_listener.dart';
 import 'package:moegirl_plus/views/article/index.dart';
 import 'package:one_context/one_context.dart';
@@ -81,21 +82,21 @@ class _SearchResultPageState extends State<SearchResultPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     
-    return NightSelector(
-      builder: (isNight) => (
+    return Observer(
+      builder: (context) => (
         Scaffold(
           appBar: AppBar(
-            brightness: isNight ? Brightness.dark : Brightness.light,
-            backgroundColor: isNight ? theme.primaryColor : Colors.white,
+            brightness: settingsStore.isNightTheme ? Brightness.dark : Brightness.light,
+            backgroundColor: settingsStore.isNightTheme ? theme.primaryColor : Colors.white,
             elevation: 3,
             leading: AppBarBackButton(
-              color: isNight ? theme.colorScheme.onPrimary : theme.hintColor,
+              color: settingsStore.isNightTheme ? theme.colorScheme.onPrimary : theme.hintColor,
             ),
             title: Text('搜索：${widget.routeArgs.keyword}',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                color: isNight ? theme.colorScheme.onPrimary : theme.hintColor
+                color: settingsStore.isNightTheme ? theme.colorScheme.onPrimary : theme.hintColor
               ),
             ),
           ),

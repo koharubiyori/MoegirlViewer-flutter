@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:moegirl_plus/components/provider_selectors/night_selector.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:moegirl_plus/mobx/index.dart';
 
 class DrawerScaffold extends StatelessWidget {
   final num width;
@@ -25,7 +26,7 @@ class DrawerScaffold extends StatelessWidget {
           children: [
             header,
             Expanded(
-              child: NightSelector(
+              child: Observer(
                 builder: (isNight) => (
                   DecoratedBox(
                     decoration: BoxDecoration(
@@ -35,7 +36,7 @@ class DrawerScaffold extends StatelessWidget {
                         fit: BoxFit.fitWidth,
                         alignment: Alignment.topLeft,
                         colorFilter: ColorFilter.mode(
-                          (isNight ? Colors.black : Colors.white).withOpacity(0.2), 
+                          (settingsStore.isNightTheme ? Colors.black : Colors.white).withOpacity(0.2), 
                         BlendMode.dstATop)
                       )
                     ),

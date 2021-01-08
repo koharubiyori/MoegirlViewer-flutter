@@ -30,6 +30,7 @@ abstract class _SettingsBase with Store {
   set theme(String value) => _data['theme'] = value;
   set lang(String value) => _data['lang'] = value;
 
+  @computed bool get isNightTheme => theme == 'night';
   @computed Locale get locale {
     final language = lang.split('-');
     return Locale(language[0], language[1]);

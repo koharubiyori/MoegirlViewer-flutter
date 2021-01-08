@@ -3,8 +3,6 @@ import 'package:moegirl_plus/api/account.dart';
 import 'package:moegirl_plus/api/edit.dart';
 import 'package:moegirl_plus/api/notification.dart';
 import 'package:moegirl_plus/prefs/index.dart';
-import 'package:moegirl_plus/providers/account.dart';
-
 
 part 'index.g.dart';
 
@@ -85,4 +83,8 @@ class LoginResult {
   final String message;
 
   LoginResult(this.successed, [this.message]);
+}
+
+enum UserGroups {
+  autoConfirmed, goodEditor, patroller
 }

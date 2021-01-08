@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart' hide showAboutDialog;
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:moegirl_plus/components/provider_selectors/logged_in_selector.dart';
 import 'package:moegirl_plus/components/styled_widgets/app_bar_back_button.dart';
 import 'package:moegirl_plus/components/styled_widgets/app_bar_title.dart';
 import 'package:moegirl_plus/generated/l10n.dart';
 import 'package:moegirl_plus/mobx/index.dart';
-import 'package:moegirl_plus/providers/account.dart';
-import 'package:moegirl_plus/providers/settings.dart';
 import 'package:moegirl_plus/utils/article_cache_manager.dart';
 import 'package:moegirl_plus/utils/reading_history_manager.dart';
 import 'package:moegirl_plus/utils/ui/dialog/alert.dart';
@@ -15,7 +12,6 @@ import 'package:moegirl_plus/views/settings/components/item.dart';
 import 'package:moegirl_plus/views/settings/utils/show_language_selection_dialog.dart';
 import 'package:moegirl_plus/views/settings/utils/show_theme_selection_dialog.dart';
 import 'package:one_context/one_context.dart';
-import 'package:provider/provider.dart';
 
 import 'utils/show_about_dialog.dart';
 
@@ -84,7 +80,7 @@ class _SettingsPageState extends State<SettingsPage> {
       );
       if (!result) return;
 
-      accountProvider.logout();
+      accountStore.logout();
       toast('已登出');
     } else {
       OneContext().pushNamed('/login');
@@ -166,11 +162,11 @@ class _SettingsPageState extends State<SettingsPage> {
                     onPressed: clearReadingHistory,
                   ),
                   title('账户'),
-                  LoggedInSelector(
-                    builder: (isLoggedIn) => (
+                  Observer(
+                    builder: (context) => (
                       SettingsPageItem(
-                        title: isLoggedIn ? '登出' : '登录',
-                        onPressed: () => toggleLoginStatus(isLoggedIn),
+                        title: accountStore.isLoggedIn ? '登出' : '登录',
+                        onPressed: () => toggleLoginStatus(accountStore.isLoggedIn),
                       )
                     ),
                   ),

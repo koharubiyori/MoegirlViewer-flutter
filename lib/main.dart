@@ -10,7 +10,6 @@ import 'package:moegirl_plus/prefs/index.dart';
 import 'package:moegirl_plus/request/moe_request.dart';
 import 'package:moegirl_plus/routes/router.dart';
 import 'package:moegirl_plus/themes.dart';
-import 'package:moegirl_plus/utils/provider_change_checker.dart';
 import 'package:moegirl_plus/utils/ui/set_status_bar.dart';
 import 'package:one_context/one_context.dart';
 import 'generated/l10n.dart';

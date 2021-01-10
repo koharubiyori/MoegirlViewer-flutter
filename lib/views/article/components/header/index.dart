@@ -50,69 +50,65 @@ class ArticlePageHeader extends StatelessWidget {
               icon: Icons.search, 
               onPressed: () => OneContext().pushNamed('search')
             )),
-            faded(Observer(
-              builder: (context) => (
-                PopupMenuButton(
-                  icon: Icon(Icons.more_vert,
-                    color: theme.colorScheme.onPrimary,
-                  ),
-                  enabled: enabledMoreButton,
-                  tooltip: i10n.articlePage_header_moreButtonTooltip,
-                  onSelected: onMoreMenuPressed,
-                  itemBuilder: (context) => [
-                    PopupMenuItem(
-                      value: ArticlePageHeaderMoreMenuValue.refresh,
-                      child: Text(i10n.articlePage_header_moreMenuRefreshButton),
-                    ),
-                    accountStore.isLoggedIn ? 
-                      PopupMenuItem(
-                        value: editFullDisabled ? ArticlePageHeaderMoreMenuValue.addSection : ArticlePageHeaderMoreMenuValue.edit,
-                        enabled: editAllowed != null && editAllowed,
-                        child: Text(
-                          editAllowed == null ?
-                            i10n.articlePage_header_moreMenuEditButton('permissionsChecking') :
-                            (editAllowed ? 
-                              (editFullDisabled ? 
-                                i10n.articlePage_header_moreMenuEditButton('addTheme') : 
-                                i10n.articlePage_header_moreMenuEditButton('full')
-                              ) :
-                              i10n.articlePage_header_moreMenuEditButton('disabled')
-                            )
-                        )
-                      )
-                    :
-                      PopupMenuItem(
-                        value: ArticlePageHeaderMoreMenuValue.login,
-                        child: Text(i10n.articlePage_header_moreMenuLoginButton)
-                      )
-                    ,
-                    if (accountStore.isLoggedIn) (
-                      PopupMenuItem(
-                        value: ArticlePageHeaderMoreMenuValue.toggleWatchList,
-                        child: Text(i10n.articlePage_header_moreMenuWatchListButton(isExistsInWatchList))
-                      )
-                    ),
-                    if (visibleTalkButton) (
-                      PopupMenuItem(
-                        value: ArticlePageHeaderMoreMenuValue.gotoTalk,
-                        child: Text(i10n.articlePage_header_moreMenuGotoTalkPageButton),
-                      )
-                    ),
-                    PopupMenuItem(
-                      value: ArticlePageHeaderMoreMenuValue.gotoVersionHistory,
-                      child: Text(i10n.articlePage_header_moreMenuGotoVersionHistoryButton),
-                    ),
-                    PopupMenuItem(
-                      value: ArticlePageHeaderMoreMenuValue.share,
-                      child: Text(i10n.articlePage_header_moreMenuGotoShareButton),
-                    ),
-                    PopupMenuItem(
-                      value: ArticlePageHeaderMoreMenuValue.openContents,
-                      child: Text(i10n.articlePage_header_moreMenuShowContentsButton)
-                    )
-                  ],
-                )
+            faded(PopupMenuButton(
+              icon: Icon(Icons.more_vert,
+                color: theme.colorScheme.onPrimary,
               ),
+              enabled: enabledMoreButton,
+              tooltip: i10n.articlePage_header_moreButtonTooltip,
+              onSelected: onMoreMenuPressed,
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  value: ArticlePageHeaderMoreMenuValue.refresh,
+                  child: Text(i10n.articlePage_header_moreMenuRefreshButton),
+                ),
+                accountStore.isLoggedIn ? 
+                  PopupMenuItem(
+                    value: editFullDisabled ? ArticlePageHeaderMoreMenuValue.addSection : ArticlePageHeaderMoreMenuValue.edit,
+                    enabled: editAllowed != null && editAllowed,
+                    child: Text(
+                      editAllowed == null ?
+                        i10n.articlePage_header_moreMenuEditButton('permissionsChecking') :
+                        (editAllowed ? 
+                          (editFullDisabled ? 
+                            i10n.articlePage_header_moreMenuEditButton('addTheme') : 
+                            i10n.articlePage_header_moreMenuEditButton('full')
+                          ) :
+                          i10n.articlePage_header_moreMenuEditButton('disabled')
+                        )
+                    )
+                  )
+                :
+                  PopupMenuItem(
+                    value: ArticlePageHeaderMoreMenuValue.login,
+                    child: Text(i10n.articlePage_header_moreMenuLoginButton)
+                  )
+                ,
+                if (accountStore.isLoggedIn) (
+                  PopupMenuItem(
+                    value: ArticlePageHeaderMoreMenuValue.toggleWatchList,
+                    child: Text(i10n.articlePage_header_moreMenuWatchListButton(isExistsInWatchList))
+                  )
+                ),
+                if (visibleTalkButton) (
+                  PopupMenuItem(
+                    value: ArticlePageHeaderMoreMenuValue.gotoTalk,
+                    child: Text(i10n.articlePage_header_moreMenuGotoTalkPageButton),
+                  )
+                ),
+                PopupMenuItem(
+                  value: ArticlePageHeaderMoreMenuValue.gotoVersionHistory,
+                  child: Text(i10n.articlePage_header_moreMenuGotoVersionHistoryButton),
+                ),
+                PopupMenuItem(
+                  value: ArticlePageHeaderMoreMenuValue.share,
+                  child: Text(i10n.articlePage_header_moreMenuGotoShareButton),
+                ),
+                PopupMenuItem(
+                  value: ArticlePageHeaderMoreMenuValue.openContents,
+                  child: Text(i10n.articlePage_header_moreMenuShowContentsButton)
+                )
+              ],
             ))
           ],
         )

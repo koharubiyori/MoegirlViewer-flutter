@@ -73,7 +73,7 @@ class _CommentReplyPageState extends State<CommentReplyPage> {
           ),
           body: Container(
             color: settingsStore.isNightTheme ? theme.backgroundColor : Color(0xffeeeeee),
-            child: StructuredListView(
+            child: StructuredListView<MobxCommentData>(
               itemDataList: commentData.children,
               reverse: true,
               
@@ -105,7 +105,7 @@ class _CommentReplyPageState extends State<CommentReplyPage> {
                   commentData: itemData,
                   rootCommentId: commentId,
                   visibleRpleyButton: true,
-                  visibleDelButton: accountStore.userName == itemData['username'],
+                  visibleDelButton: accountStore.userName == itemData.userName,
                 )
               ),
 

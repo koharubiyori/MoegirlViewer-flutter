@@ -12,13 +12,13 @@ mixin _$CommentStore on _CommentBase, Store {
   final _$dataAtom = Atom(name: '_CommentBase.data');
 
   @override
-  Map<int, MobxPageComments> get data {
+  ObservableMap<int, MobxPageComments> get data {
     _$dataAtom.reportRead();
     return super.data;
   }
 
   @override
-  set data(Map<int, MobxPageComments> value) {
+  set data(ObservableMap<int, MobxPageComments> value) {
     _$dataAtom.reportWrite(value, super.data, () {
       super.data = value;
     });
@@ -27,7 +27,7 @@ mixin _$CommentStore on _CommentBase, Store {
   final _$loadNextAsyncAction = AsyncAction('_CommentBase.loadNext');
 
   @override
-  Future<dynamic> loadNext(int pageId) {
+  Future<void> loadNext(int pageId) {
     return _$loadNextAsyncAction.run(() => super.loadNext(pageId));
   }
 
@@ -42,7 +42,7 @@ mixin _$CommentStore on _CommentBase, Store {
   final _$addCommentAsyncAction = AsyncAction('_CommentBase.addComment');
 
   @override
-  Future addComment(int pageId, String content, [String commentId]) {
+  Future<void> addComment(int pageId, String content, [String commentId]) {
     return _$addCommentAsyncAction
         .run(() => super.addComment(pageId, content, commentId));
   }
@@ -50,7 +50,7 @@ mixin _$CommentStore on _CommentBase, Store {
   final _$removeAsyncAction = AsyncAction('_CommentBase.remove');
 
   @override
-  Future remove(int pageId, String commentId, [String rootCommentId]) {
+  Future<void> remove(int pageId, String commentId, [String rootCommentId]) {
     return _$removeAsyncAction
         .run(() => super.remove(pageId, commentId, rootCommentId));
   }
@@ -58,7 +58,7 @@ mixin _$CommentStore on _CommentBase, Store {
   final _$_CommentBaseActionController = ActionController(name: '_CommentBase');
 
   @override
-  dynamic refresh(int pageId) {
+  Future<void> refresh(int pageId) {
     final _$actionInfo = _$_CommentBaseActionController.startAction(
         name: '_CommentBase.refresh');
     try {

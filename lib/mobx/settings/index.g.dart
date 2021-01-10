@@ -47,6 +47,13 @@ mixin _$SettingsStore on _SettingsBase, Store {
   String get lang => (_$langComputed ??=
           Computed<String>(() => super.lang, name: '_SettingsBase.lang'))
       .value;
+  Computed<bool> _$isNightThemeComputed;
+
+  @override
+  bool get isNightTheme =>
+      (_$isNightThemeComputed ??= Computed<bool>(() => super.isNightTheme,
+              name: '_SettingsBase.isNightTheme'))
+          .value;
   Computed<Locale> _$localeComputed;
 
   @override
@@ -78,6 +85,7 @@ cachePriority: ${cachePriority},
 source: ${source},
 theme: ${theme},
 lang: ${lang},
+isNightTheme: ${isNightTheme},
 locale: ${locale}
     ''';
   }

@@ -159,6 +159,21 @@ mixin _$MobxCommentData on _MobxCommentDataBase, Store {
     });
   }
 
+  final _$targetAtom = Atom(name: '_MobxCommentDataBase.target');
+
+  @override
+  MobxCommentData get target {
+    _$targetAtom.reportRead();
+    return super.target;
+  }
+
+  @override
+  set target(MobxCommentData value) {
+    _$targetAtom.reportWrite(value, super.target, () {
+      super.target = value;
+    });
+  }
+
   @override
   String toString() {
     return '''
@@ -171,7 +186,8 @@ parentId: ${parentId},
 like: ${like},
 myatt: ${myatt},
 requestOffset: ${requestOffset},
-children: ${children}
+children: ${children},
+target: ${target}
     ''';
   }
 }

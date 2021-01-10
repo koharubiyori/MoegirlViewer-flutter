@@ -5,8 +5,10 @@ part 'index.g.dart';
 
 class MobxCommentData = _MobxCommentDataBase with _$MobxCommentData;
 
-List<MobxCommentData> toMobxCommentList(List list) {
-  return list.map((item) => MobxCommentData.fromApiData(item)).cast<MobxCommentData>();
+ObservableList<MobxCommentData> toMobxCommentList(List list) {
+  return ObservableList.of(
+    list.map((item) => MobxCommentData.fromApiData(item)).cast<MobxCommentData>().toList()
+  );
 }
 
 abstract class _MobxCommentDataBase with Store {
@@ -32,9 +34,9 @@ abstract class _MobxCommentDataBase with Store {
     userName = apiData['username'];
     text = apiData['text'];
     timestamp = apiData['timestamp'];
-    parentId = apiData['parentId'];
+    parentId = apiData['parentid'];
     like = apiData['like'];
     requestOffset = apiData['requestOffset'];
-    children = toMobxCommentList(apiData['children']);
+    children = toMobxCommentList(apiData['children'] ?? []);
   }
 }

@@ -12,13 +12,13 @@ mixin _$MobxPageComments on _MobxPageCommentsBase, Store {
   final _$popularAtom = Atom(name: '_MobxPageCommentsBase.popular');
 
   @override
-  List<MobxCommentData> get popular {
+  ObservableList<MobxCommentData> get popular {
     _$popularAtom.reportRead();
     return super.popular;
   }
 
   @override
-  set popular(List<MobxCommentData> value) {
+  set popular(ObservableList<MobxCommentData> value) {
     _$popularAtom.reportWrite(value, super.popular, () {
       super.popular = value;
     });
@@ -27,13 +27,13 @@ mixin _$MobxPageComments on _MobxPageCommentsBase, Store {
   final _$commentTreeAtom = Atom(name: '_MobxPageCommentsBase.commentTree');
 
   @override
-  List<MobxCommentData> get commentTree {
+  ObservableList<MobxCommentData> get commentTree {
     _$commentTreeAtom.reportRead();
     return super.commentTree;
   }
 
   @override
-  set commentTree(List<MobxCommentData> value) {
+  set commentTree(ObservableList<MobxCommentData> value) {
     _$commentTreeAtom.reportWrite(value, super.commentTree, () {
       super.commentTree = value;
     });

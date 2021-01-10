@@ -105,7 +105,7 @@ class _ArticlePageState extends State<ArticlePage> with
 
     // 监听登录状态变化，重新检查编辑权限
     autorun((_) {
-      if (accountStore.isLoggedIn) setStateFromPageInfo(pageInfo);
+      if (accountStore.isLoggedIn && pageInfo != null) setStateFromPageInfo(pageInfo);
     });
   }
 

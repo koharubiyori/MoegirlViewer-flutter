@@ -8,6 +8,7 @@ import 'package:moegirl_plus/components/styled_widgets/app_bar_back_button.dart'
 import 'package:moegirl_plus/components/styled_widgets/app_bar_icon.dart';
 import 'package:moegirl_plus/components/styled_widgets/app_bar_title.dart';
 import 'package:moegirl_plus/components/styled_widgets/refresh_indicator.dart';
+import 'package:moegirl_plus/mobx/comment/classes/comment_data/index.dart';
 import 'package:moegirl_plus/mobx/index.dart';
 import 'package:moegirl_plus/utils/add_infinity_list_loading_listener.dart';
 import 'package:moegirl_plus/utils/check_is_login.dart';
@@ -83,77 +84,73 @@ class _CommentPageState extends State<CommentPage> {
         actions: [AppBarIcon(icon: Icons.add_comment, onPressed: addComment)],
       ),
       body: Observer(
-        builder: (context) => (
-          Container(
+        builder: (context) {
+          final commentData = commentStore.data[widget.routeArgs.pageId];
+          return Container(
             color: settingsStore.isNightTheme ? theme.backgroundColor : Color(0xffeeeeee),
-            child: Observer(
-              builder: (context) {
-                final commentData = commentStore.data[widget.routeArgs.pageId];
-                return StyledRefreshIndicator(
-                  onRefresh: () => commentStore.refresh(widget.routeArgs.pageId),
-                  child: StructuredListView(
-                    controller: scrollController,
-                    itemDataList: commentData.commentTree,
+            child: StyledRefreshIndicator(
+              onRefresh: () => commentStore.refresh(widget.routeArgs.pageId),
+              child: StructuredListView<MobxCommentData>(
+                controller: scrollController,
+                itemDataList: commentData.commentTree,
 
-                    headerBuilder: () {
-                      if (commentData.popular.length == 0) return Container(width: 0, height: 0);
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.all(10),
-                            child: Text('热门评论',
-                              style: TextStyle(
-                                color: theme.hintColor,
-                                fontSize: 17,
-                              ),
-                            ),
+                headerBuilder: () {
+                  if (commentData.popular.length == 0) return Container(width: 0, height: 0);
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.all(10),
+                        child: Text('热门评论',
+                          style: TextStyle(
+                            color: theme.hintColor,
+                            fontSize: 17,
                           ),
-                          
-                          ...commentData.popular.map((itemData) =>
-                            CommentPageItem(
-                              isPopular: true,
-                              commentData: itemData,
-                              pageId: widget.routeArgs.pageId,
-                              visibleDelButton: accountStore.userName == itemData.userName,
-                              visibleRpleyButton: false,
-                            )
-                          ).toList(),
+                        ),
+                      ),
+                      
+                      ...commentData.popular.map((itemData) =>
+                        CommentPageItem(
+                          isPopular: true,
+                          commentData: itemData,
+                          pageId: widget.routeArgs.pageId,
+                          visibleDelButton: accountStore.userName == itemData.userName,
+                          visibleRpleyButton: false,
+                        )
+                      ).toList(),
 
-                          Padding(
-                            padding: EdgeInsets.all(10).copyWith(top: 9),
-                            child: Text('共${commentData.count}条评论',
-                              style: TextStyle(
-                                color: theme.hintColor,
-                                fontSize: 17
-                              ),
-                            ),
-                          )
-                        ]
-                      );
-                    },
-                    
-                    itemBuilder: (context, itemData, index) => (
-                      CommentPageItem(
-                        commentData: itemData,
-                        pageId: widget.routeArgs.pageId,
-                        visibleDelButton: accountStore.userName == itemData['username'],
-                        visibleReply: true,
-                        visibleRpleyButton: true,
+                      Padding(
+                        padding: EdgeInsets.all(10).copyWith(top: 9),
+                        child: Text('共${commentData.count}条评论',
+                          style: TextStyle(
+                            color: theme.hintColor,
+                            fontSize: 17
+                          ),
+                        ),
                       )
-                    ),
+                    ]
+                  );
+                },
+                
+                itemBuilder: (context, itemData, index) => (
+                  CommentPageItem(
+                    commentData: itemData,
+                    pageId: widget.routeArgs.pageId,
+                    visibleDelButton: accountStore.userName == itemData.userName,
+                    visibleReply: true,
+                    visibleRpleyButton: true,
+                  )
+                ),
 
-                    footerBuilder: () => InfinityListFooter(
-                      status: commentData.status, 
-                      emptyText: '暂无评论',
-                      onReloadingButtonPrssed: () => commentStore.loadNext(widget.routeArgs.pageId)
-                    )
-                  ),
-                );
-              },
+                footerBuilder: () => InfinityListFooter(
+                  status: commentData.status, 
+                  emptyText: '暂无评论',
+                  onReloadingButtonPrssed: () => commentStore.loadNext(widget.routeArgs.pageId)
+                )
+              ),
             ),
-          )
-        ),
+          );
+        },
       )
     );
   }

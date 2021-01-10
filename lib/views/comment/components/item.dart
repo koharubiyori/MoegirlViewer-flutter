@@ -130,7 +130,7 @@ class CommentPageItem extends StatelessWidget {
     final theme = Theme.of(context);
 
     // 为回复带上回复对象的数据
-    final replyList = commentData.children != null ? 
+    final List<MobxCommentData> replyList = commentData.children != null ? 
       commentData.children.map((item) {
         if (item.parentId != commentData.id) {
           item.target = commentData.children.firstWhere((childItem) => childItem.id == item.parentId, orElse: () => null);
@@ -247,6 +247,7 @@ class CommentPageItem extends StatelessWidget {
                                     child: Observer(
                                       builder: (context) {
                                         final foundData = commentStore.findByCommentId(pageId, commentData.id, isPopular);
+                                        if (foundData == null) return Container();  // 删除评论时会触发这里导致找到的评论数据为null
                                         final likeNumber = foundData.like;
                                         final myLiked = foundData.myatt == 1;
                                         
@@ -345,7 +346,7 @@ class CommentPageItem extends StatelessWidget {
                         // 回复
                         if (visibleReply && commentData.children.length != 0) (
                           Observer(
-                            builder: (isNight) => (
+                            builder: (context) => (
                               Container(
                                 alignment: Alignment.topLeft,
                                 margin: EdgeInsets.only(top: 10, right: 25, bottom: 5),
@@ -354,7 +355,7 @@ class CommentPageItem extends StatelessWidget {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    ...replyList.take(3).cast<Map>().map((item) =>
+                                    ...replyList.take(3).map((item) =>
                                       Padding(
                                         padding: EdgeInsets.only(bottom: 2),
                                         child: RichText(
@@ -367,16 +368,16 @@ class CommentPageItem extends StatelessWidget {
                                             ),
                                             children: [
                                               TextSpan(
-                                                text: item['username'],
+                                                text: item.userName,
                                                 style: TextStyle(color: theme.accentColor)
                                               ),
-                                              if (item.containsKey('target')) TextSpan(text: ' 回复 '),
-                                              if (item.containsKey('target')) TextSpan(
-                                                text: item['target']['username'],
+                                              if (item.target != null) TextSpan(text: ' 回复 '),
+                                              if (item.target != null) TextSpan(
+                                                text: item.target.userName,
                                                 style: TextStyle(color: theme.accentColor)
                                               ),
                                               TextSpan(text: '：'),
-                                              TextSpan(text: trimHtml(item['text']))
+                                              TextSpan(text: trimHtml(item.text))
                                             ]
                                           ),
                                         ),
